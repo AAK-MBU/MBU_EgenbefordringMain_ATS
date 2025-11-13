@@ -69,7 +69,7 @@ async def populate_queue(workqueue: Workqueue):
         else:
             new_items.append(item)
 
-    await concurrent_add(workqueue, new_items, logger)
+    await concurrent_add(workqueue, new_items)
     logger.info("Finished populating workqueue.")
 
 
