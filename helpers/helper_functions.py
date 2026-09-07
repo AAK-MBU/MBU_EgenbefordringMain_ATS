@@ -30,6 +30,13 @@ from processes import finalize_process
 
 logger = logging.getLogger(__name__)
 
+# Columns that must be read as text so leading zeros in a CPR survive.
+CPR_COLUMNS = [
+    "cpr_nummer_barn",
+    "cpr_beloebsmodtager_mitid",
+    "cpr_anden_beloebsmodtager_manuelt",
+]
+
 
 def delete_all_files_in_path(path):
     """Delete all files and directories in the given path."""
@@ -93,12 +100,18 @@ def load_excel_data(file_name: str, sharepoint: Sharepoint) -> pd.DataFrame:
 
     df = pd.read_excel(
         BytesIO(bytes_data),
-        dtype={
-            "cpr_barnet": str,
-            "cpr_nr": str,
-            "cpr_nr_paaanden": str,
-        },
+        dtype=dict.fromkeys(CPR_COLUMNS, str),
     )
+
+    missing_cpr_columns = [c for c in CPR_COLUMNS if c not in df.columns]
+
+    if missing_cpr_columns:
+        raise ValueError(
+            "Excel file is missing the CPR columns "
+            f"{missing_cpr_columns}. pandas silently ignores dtype entries for "
+            "columns it cannot find, so continuing would read the remaining CPR "
+            "numbers as integers and drop their leading zeros."
+        )
 
     logger.info(f"Rows before filtering: {len(df)}")
 
@@ -122,10 +135,11 @@ def process_data(df: pd.DataFrame, naeste_agent: str, file_name) -> pd.DataFrame
     processed_data = []
 
     for _, row in df.iterrows():
+        # The logged-in citizen is the recipient unless another one was named.
         cpr_nr = (
-            str(row["cpr_nr_paaanden"])
-            if not pd.isnull(row["cpr_nr_paaanden"])
-            else str(row["cpr_nr"])
+            str(row["cpr_anden_beloebsmodtager_manuelt"])
+            if not pd.isnull(row["cpr_anden_beloebsmodtager_manuelt"])
+            else str(row["cpr_beloebsmodtager_mitid"])
         )
 
         attachments_str = str(row.get("attachments", ""))
