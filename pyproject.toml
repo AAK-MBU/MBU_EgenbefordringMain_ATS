@@ -1,6 +1,6 @@
 [project]
 name = "mbu_egenbefordring_main_ats"
-version = "2.1.0"
+version = "3.0.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -27,3 +27,9 @@ automation-server-client = { git = "https://github.com/odense-rpa/automation-ser
 
 [tool.setuptools]
 py-modules = []
+
+# CI installs ruff unpinned, so without an explicit rule set the lint result
+# changes whenever ruff ships new defaults. These are the rules the repo was
+# already being held to; widen the list deliberately, not by upgrading ruff.
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
