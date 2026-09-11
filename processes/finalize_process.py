@@ -18,6 +18,7 @@ COLUMNS = [
     "barnets_navn",
     "cpr_nummer_barn",
     "barnets_adresse",
+    "adresse_der_blev_koert_til_fra",
     "kunne_du_ikke_finde_skole_eller_dagtilbud_paa_listen_",
     "skoleliste",
     "skriv_dit_barns_skole_eller_dagtilbud",
